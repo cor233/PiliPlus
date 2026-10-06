@@ -1,4 +1,5 @@
 import 'package:PiliPlus/common/skeleton/video_reply.dart';
+import 'package:PiliPlus/common/sliver_single_child_delegate.dart';
 import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/common/widgets/flutter/refresh_indicator.dart';
 import 'package:PiliPlus/common/widgets/loading_widget/http_error.dart';
@@ -133,6 +134,7 @@ class _VideoReplyPanelState extends State<VideoReplyPanel>
                     null,
                     oid: _videoReplyController.aid,
                     replyType: _videoReplyController.videoType.replyType,
+                    mentionItem: _videoReplyController.mentionItem,
                   );
                 },
                 tooltip: '发表评论',
@@ -148,9 +150,12 @@ class _VideoReplyPanelState extends State<VideoReplyPanel>
   Widget _buildBody(LoadingState<List<ReplyInfo>?> loadingState) {
     switch (loadingState) {
       case Loading():
-        return SliverList.builder(
-          itemBuilder: (context, index) => const VideoReplySkeleton(),
-          itemCount: 5,
+        return const SliverPrototypeExtentList(
+          prototypeItem: VideoReplySkeleton(),
+          delegate: SliverSingleChildDelegate(
+            count: 5,
+            child: VideoReplySkeleton(),
+          ),
         );
       case Success(:final response):
         if (response != null && response.isNotEmpty) {
@@ -191,8 +196,7 @@ class _VideoReplyPanelState extends State<VideoReplyPanel>
                       _videoReplyController.onRemove(index, item, subIndex),
                   upMid: _videoReplyController.upMid,
                   getTag: () => heroTag,
-                  onCheckReply: (item) =>
-                      _videoReplyController.onCheckReply(item, isManual: true),
+                  onCheckReply: _videoReplyController.onCheckReply,
                   onToggleTop: (item) => _videoReplyController.onToggleTop(
                     item,
                     index,

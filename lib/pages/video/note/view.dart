@@ -1,4 +1,5 @@
 import 'package:PiliPlus/common/skeleton/video_reply.dart';
+import 'package:PiliPlus/common/sliver_single_child_delegate.dart';
 import 'package:PiliPlus/common/widgets/flutter/refresh_indicator.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/common/widgets/loading_widget/http_error.dart';
@@ -154,17 +155,7 @@ class _NoteListPageState extends State<NoteListPage>
                   borderRadius: BorderRadius.all(Radius.circular(6)),
                 ),
               ),
-              onPressed: () {
-                MiniScaffold.of(context).showBottomSheet(
-                  constraints: const BoxConstraints(),
-                  (context) => WebviewPage(
-                    oid: widget.oid,
-                    title: widget.title,
-                    url:
-                        'https://www.bilibili.com/h5/note-app?oid=${widget.oid}&pagefrom=ugcvideo&is_stein_gate=${widget.isStein ? 1 : 0}',
-                  ),
-                );
-              },
+              onPressed: () => _onTakeNote(context),
               child: const Text('开始记笔记'),
             ),
           ),
@@ -179,10 +170,12 @@ class _NoteListPageState extends State<NoteListPage>
   ) {
     switch (loadingState) {
       case Loading():
-        return SliverPrototypeExtentList.builder(
-          prototypeItem: const VideoReplySkeleton(),
-          itemBuilder: (_, _) => const VideoReplySkeleton(),
-          itemCount: 8,
+        return const SliverPrototypeExtentList(
+          prototypeItem: VideoReplySkeleton(),
+          delegate: SliverSingleChildDelegate(
+            count: 8,
+            child: VideoReplySkeleton(),
+          ),
         );
       case Success(:final response):
         if (response != null && response.isNotEmpty) {
@@ -301,6 +294,15 @@ class _NoteListPageState extends State<NoteListPage>
           ),
         ),
       ),
+    );
+  }
+
+  void _onTakeNote(BuildContext context) {
+    final url =
+        'https://www.bilibili.com/h5/note-app?oid=${widget.oid}&pagefrom=ugcvideo&is_stein_gate=${widget.isStein ? 1 : 0}';
+    MiniScaffold.of(context).showBottomSheet(
+      constraints: const BoxConstraints(),
+      (context) => WebviewPage(oid: widget.oid, title: widget.title, url: url),
     );
   }
 }
